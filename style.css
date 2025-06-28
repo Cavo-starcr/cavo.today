@@ -551,3 +551,97 @@ button:hover, .cta-button:hover {
     margin-bottom: 20px;
     border-radius: 5px; /* Optional */
 }
+
+/* Footer Styles */
+.footer {
+    background-color: #0A2342; /* Глубокий Синий */
+    color: #FFFFFF;
+    padding: 40px 0;
+    margin-top: 30px; /* Add some space above the footer */
+}
+
+.footer .container { /* Override default container padding for footer if needed */
+    width: 80%; /* Consistent with header and main content */
+    margin: auto;
+    padding: 0; /* Reset padding if you want edge-to-edge background for footer cols */
+    background-color: transparent; /* Ensure footer container is transparent */
+    box-shadow: none; /* Remove shadow from main container style */
+}
+
+.footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px; /* Space between columns */
+    margin-bottom: 30px;
+}
+
+.footer-col {
+    flex: 1;
+    min-width: 200px; /* Minimum width for columns */
+    margin-bottom: 20px;
+}
+
+.footer-col h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.footer-col p, .footer-col ul {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.9em;
+    line-height: 1.7;
+    color: #E0E0E0; /* Lighter gray for footer text */
+}
+
+.footer-col ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-col ul li {
+    margin-bottom: 10px;
+}
+
+.footer-col ul li a {
+    color: #E0E0E0;
+    text-decoration: none;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+.footer-col ul li a:hover {
+    color: #00A8CC; /* Бирюзовый */
+    text-decoration: underline;
+}
+
+.footer-col .icon {
+    color: #00A8CC; /* Ensure icons in footer use accent color */
+    margin-right: 8px;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #4A5C6E; /* Separator line */
+    font-size: 0.85em;
+    color: #A0A0A0; /* Medium gray for copyright */
+}
+
+/* Responsive Footer Adjustments */
+@media (max-width: 768px) {
+    .footer-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .footer-col {
+        min-width: 100%; /* Full width for columns on smaller screens */
+        margin-bottom: 30px;
+    }
+    .footer-col ul {
+        padding-left: 0; /* Reset padding for centered text */
+    }
+}
