@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Çiçək Bazarı — Təzə çiçəklər, sərfəli qiymət</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/lucide-react@0.294.0/dist/umd/lucide-react.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        rose: {
+                            50: '#FFF9F5',
+                            100: '#FFE4EC',
+                            200: '#FFCCD9',
+                            300: '#FFB3C6',
+                            400: '#FF8FAB',
+                            500: '#FF6B8A',
+                            600: '#E84D6D',
+                            700: '#C43A58',
+                            800: '#9D2E47',
+                            900: '#7A243A',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(165deg, #FFE4EC 0%, #FFF9F5 50%, #FFFFFF 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+        }
+        .photo-style {
+            filter: saturate(0.92) contrast(1.04) brightness(1.01);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 24px -4px rgba(157, 46, 71, 0.12), 0 2px 8px -2px rgba(157, 46, 71, 0.08);
+        }
+        .card-shadow-hover {
+            box-shadow: 0 12px 40px -8px rgba(157, 46, 71, 0.2), 0 4px 16px -4px rgba(157, 46, 71, 0.12);
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.02); }
+        }
+        .pulse-badge {
+            animation: pulse-soft 2s ease-in-out infinite;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+        const { motion, AnimatePresence } = Motion;
+        const { ArrowLeft, Clock, MapPin, Copy, MessageCircle, Check, X, Heart, Flower2 } = lucideReact;
+
+        const listings = [
+            {
+                id: 1,
+                name: "Aysel",
+                phone: "+994 50 123 45 67",
+                district: "Nəsimi",
+                flowerType: "Qızılgül buketi",
+                originalPrice: 280,
+                resalePrice: 140,
+                postedMinutes: 23,
+                freshnessHours: 18,
+                images: [
+                    "https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=600&h=800&fit=crop",
+                    "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&h=800&fit=crop",
+                    "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=600&h=800&fit=crop"
+                ],
+                description: "Dünən ad günümə hədiyyə aldılar. Çox gözəl buketdir, evdə yer yoxdur."
+            },
+            {
+                id: 2,
+                name: "Leyla",
+                phone: "+994 55 234 56 78",
+                district: "Yasamal",
+                flowerType: "Pion buketi",
+                originalPrice: 350,
+                resalePrice: 175,
+                postedMinutes: 47,
+                freshnessHours: 22,
+                images: [
+                    "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=600&h=800&fit=crop",
+                    "https://images.unsplash.com/photo-1457089328109-e5d9bd499191?w=600&h=800&fit=crop"
+                ],
+                description: "Səhər gətirdilər, işə getməliyəm. Pionlar super təzədir."
+            },
+            {
+                id: 3,
+                name: "Nigar",
+                phone: "+994 70 345 67 89",
+                district: "Xətai",
+                flowerType: "Mix buket",
+                originalPrice: 200,
+                resalePrice: 95,
+                postedMinutes: 68,
+                freshnessHours: 16,
+                images: [
+                    "https://images.unsplash.com/photo-1522057306606-8d84dfe89426?w=600&h=800&fit=crop",
+                    "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=600&h=800&fit=crop",
+                    "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=600&h=800&fit=crop"
+                ],
+                description: "Rəngarəng buket, evdə allerji var, satmalıyam."
+            },
+            {
+                id: 4,
+                name: "Günay",
+                phone: "+994 77 456 78 90",
+                district: "Səbail",
+                flowerType: "Ağ qızılgül",
+                originalPrice: 320,
+                resalePrice: 150,
+                postedMinutes: 95,
+                freshnessHours: 20,
+                images: [
+                    "https://images.unsplash.com/photo-1495231916356-a86217efff12?w=600&h=800&fit=crop",
+                    "https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=600&h=800&fit=crop"
+                ],
+                description: "51 ağ qızılgül. Nişan hədiyyəsi idi, artıq ehtiyac yoxdur."
+            },
+            {
+                id: 5,
+                name: "Fidan",
+                phone: "+994 51 567 89 01",
+                district: "Nizami",
+                flowerType: "Tulpan buketi",
+                originalPrice: 180,
+                resalePrice: 85,
+                postedMinutes: 120,
+                freshnessHours: 14,
+                images: [
+                    "https://images.unsplash.com/photo-1520763185298-1b434c919102?w=600&h=800&fit=crop",
+                    "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600&h=800&fit=crop"
+                ],
+                description: "Hollandiya tulpanları, bu səhər gəlib. Tez satılmalıdır."
+            },
+            {
+                id: 6,
+                name: "Sevda",
+                phone: "+994 55 678 90 12",
+                district: "Nəsimi",
+                flowerType: "Qırmızı qızılgül",
+                originalPrice: 250,
+                resalePrice: 120,
+                postedMinutes: 156,
+                freshnessHours: 12,
+                images: [
+                    "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&h=800&fit=crop",
+                    "https://images.unsplash.com/photo-1494972308805-463bc619d34e?w=600&h=800&fit=crop",
+                    "https://images.unsplash.com/photo-1548094990-c16ca90f1f0d?w=600&h=800&fit=crop"
+                ],
+                description: "31 qırmızı gül, qutusu ilə birlikdə. Ad günü hədiyyəsi."
+            },
+            {
+                id: 7,
+                name: "Lalə",
+                phone: "+994 70 789 01 23",
+                district: "Yasamal",
+                flowerType: "Orkide",
+                originalPrice: 400,
+                resalePrice: 200,
+                postedMinutes: 45,
+                freshnessHours: 48,
+                images: [
+                    "https://images.unsplash.com/photo-1567696911980-2eed69a46042?w=600&h=800&fit=crop",
+                    "https://images.unsplash.com/photo-1610397648930-477b8c7f0943?w=600&h=800&fit=crop"
+                ],
+                description: "Ağ orkide saksıda. Yeni evə köçürəm, apara bilmirəm."
+            },
+            {
+                id: 8,
+                name: "Türkan",
+                phone: "+994 50 890 12 34",
+                district: "Xətai",
+                flowerType: "Çobanyastığı",
+                originalPrice: 150,
+                resalePrice: 70,
+                postedMinutes: 180,
+                freshnessHours: 10,
+                images: [
+                    "https://images.unsplash.com/photo-1455659817273-f96807779a8a?w=600&h=800&fit=crop",
+                    "https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=600&h=800&fit=crop"
+                ],
+                description: "Zərif çobanyastığı buketi. Ofisə gətirdilər, evə aparıram."
+            },
+            {
+                id: 9,
+                name: "Aytən",
+                phone: "+994 77 901 23 45",
+                district: "Səbail",
+                flowerType: "Gerbera mix",
+                originalPrice: 220,
+                resalePrice: 100,
+                postedMinutes: 38,
+                freshnessHours: 24,
+                images: [
+                    "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=600&h=800&fit=crop",
+                    "https://images.unsplash.com/photo-1444021465936-c6ca81d39b84?w=600&h=800&fit=crop",
+                    "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=600&h=800&fit=crop"
+                ],
+                description: "Rəngli gerberalar, super əhval-ruhiyyə verir. Təcili satış."
+            },
+            {
+                id: 10,
+                name: "Nuray",
+                phone: "+994 51 012 34 56",
+                district: "Nizami",
+                flowerType: "Şakayıq buketi",
+                originalPrice: 380,
+                resalePrice: 180,
+                postedMinutes: 72,
+                freshnessHours: 26,
+                images: [
+                    "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=600&h=800&fit=crop",
+                    "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&h=800&fit=crop"
+                ],
+                description: "Premium şakayıq buketi, çəhrayı rəng. Toy hədiyyəsi idi."
+            }
+        ];
+
+        const formatTime = (minutes) => {
+            if (minutes < 60) return `${minutes} dəq əvvəl`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours} saat əvvəl`;
+            return `${Math.floor(hours / 24)} gün əvvəl`;
+        };
+
+        const cardVariants = {
+            hidden: { opacity: 0, y: 30, scale: 0.95 },
+            visible: (i) => ({
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                transition: {
+                    delay: i * 0.07,
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 25
+                }
+            }),
+            exit: { opacity: 0, y: -20, transition: { duration: 0.2 } }
+        };
+
+        const pageVariants = {
+            initial: { opacity: 0, x: 50 },
+            animate: {
+                opacity: 1,
+                x: 0,
+                transition: { type: "spring", stiffness: 300, damping: 30 }
+            },
+            exit: {
+                opacity: 0,
+                x: -50,
+                transition: { duration: 0.2 }
+            }
+        };
+
+        const modalVariants = {
+            hidden: { opacity: 0, y: 100, scale: 0.95 },
+            visible: {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                transition: { type: "spring", stiffness: 400, damping: 30 }
+            },
+            exit: {
+                opacity: 0,
+                y: 100,
+                scale: 0.95,
+                transition: { duration: 0.25 }
+            }
+        };
+
+        const backdropVariants = {
+            hidden: { opacity: 0 },
+            visible: { opacity: 1 },
+            exit: { opacity: 0 }
+        };
+
+        const FreshnessTimer = ({ hours }) => {
+            const [currentHours, setCurrentHours] = useState(hours);
+            const [currentMinutes, setCurrentMinutes] = useState(0);
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setCurrentMinutes(prev => {
+                        if (prev === 0) {
+                            if (currentHours > 0) {
+                                setCurrentHours(h => h - 1);
+                                return 59;
+                            }
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 60000);
+                return () => clearInterval(interval);
+            }, [currentHours]);
+
+            const percentage = (currentHours / 48) * 100;
+            const getColor = () => {
+                if (percentage > 50) return "from-emerald-400 to-emerald-500";
+                if (percentage > 25) return "from-amber-400 to-orange-500";
+                return "from-rose-400 to-red-500";
+            };
+
+            return (
+                <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-rose-100">
+                    <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-gray-600">Təzəlik</span>
+                        <motion.span
+                            className="text-sm font-semibold text-gray-800"
+                            key={currentHours}
+                            initial={{ scale: 1.2, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: "spring", stiffness: 500 }}
+                        >
+                            ~{currentHours} saat qalıb
+                        </motion.span>
+                    </div>
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <motion.div
+                            className={`h-full bg-gradient-to-r ${getColor()} rounded-full`}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${percentage}%` }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                        />
+                    </div>
+                </div>
+            );
+        };
+
+        const SkeletonCard = () => (
+            <div className="bg-white rounded-3xl overflow-hidden card-shadow">
+                <div className="aspect-[4/5] skeleton" />
+                <div className="p-4 space-y-3">
+                    <div className="h-4 skeleton rounded-full w-3/4" />
+                    <div className="h-3 skeleton rounded-full w-1/2" />
+                    <div className="h-6 skeleton rounded-full w-1/3" />
+                </div>
+            </div>
+        );
+
+        const ListingCard = ({ listing, index, onClick }) => {
+            const [imageLoaded, setImageLoaded] = useState(false);
+            const discount = Math.round((1 - listing.resalePrice / listing.originalPrice) * 100);
+
+            return (
+                <motion.div
+                    custom={index}
+                    variants={cardVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    whileHover={{ scale: 1.02, y: -4 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={onClick}
+                    className="bg-white rounded-3xl overflow-hidden card-shadow hover:card-shadow-hover transition-shadow duration-300 cursor-pointer"
+                >
+                    <div className="relative aspect-[4/5] overflow-hidden bg-rose-50">
+                        {!imageLoaded && <div className="absolute inset-0 skeleton" />}
+                        <img
+                            src={listing.images[0]}
+                            alt={listing.flowerType}
+                            onLoad={() => setImageLoaded(true)}
+                            className={`w-full h-full object-cover photo-style transition-all duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                            style={{ transform: 'rotate(-0.5deg) scale(1.02)' }}
+                        />
+                        <div className="absolute top-3 left-3">
+                            <motion.div
+                                className="bg-rose-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg pulse-badge"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: index * 0.07 + 0.3, type: "spring" }}
+                            >
+                                -{discount}%
+                            </motion.div>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent p-3 pt-8">
+                            <div className="flex items-center gap-1.5 text-white/90 text-xs">
+                                <Clock size={12} />
+                                <span>{formatTime(listing.postedMinutes)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="p-4">
+                        <h3 className="font-semibold text-gray-800 text-sm mb-1 truncate">{listing.flowerType}</h3>
+                        <div className="flex items-center gap-1.5 text-gray-500 text-xs mb-3">
+                            <MapPin size={12} />
+                            <span>{listing.district}</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-lg font-bold text-rose-600">{listing.resalePrice} ₼</span>
+                            <span className="text-sm text-gray-400 line-through">{listing.originalPrice} ₼</span>
+                        </div>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const Header = ({ showBack, onBack, title }) => (
+            <motion.header
+                className="sticky top-0 z-40 glass border-b border-rose-100/50"
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+                <div className="max-w-lg mx-auto px-4 py-4 flex items-center gap-4">
+                    {showBack && (
+                        <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={onBack}
+                            className="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-sm border border-rose-100"
+                        >
+                            <ArrowLeft size={20} className="text-gray-700" />
+                        </motion.button>
+                    )}
+                    <div className={showBack ? "" : "text-center w-full"}>
+                        {!showBack && (
+                            <motion.div
+                                className="flex items-center justify-center gap-2 mb-0.5"
+                                initial={{ scale: 0.9 }}
+                                animate={{ scale: 1 }}
+                            >
+                                <Flower2 size={24} className="text-rose-500" />
+                                <h1 className="text-xl font-bold bg-gradient-to-r from-rose-600 to-rose-400 bg-clip-text text-transparent">
+                                    {title || "Çiçək Bazarı"}
+                                </h1>
+                            </motion.div>
+                        )}
+                        {showBack ? (
+                            <h1 className="text-lg font-semibold text-gray-800">{title}</h1>
+                        ) : (
+                            <p className="text-xs text-gray-500">Təzə çiçəklər, sərfəli qiymət</p>
+                        )}
+                    </div>
+                </div>
+            </motion.header>
+        );
+
+        const ContactModal = ({ listing, onClose }) => {
+            const [copied, setCopied] = useState(false);
+
+            const handleCopy = async () => {
+                await navigator.clipboard.writeText(listing.phone);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            };
+
+            const handleWhatsApp = () => {
+                const phone = listing.phone.replace(/\s/g, '').replace('+', '');
+                window.open(`https://wa.me/${phone}`, '_blank');
+            };
+
+            return (
+                <motion.div
+                    className="fixed inset-0 z-50 flex items-end justify-center"
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                >
+                    <motion.div
+                        variants={backdropVariants}
+                        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                        onClick={onClose}
+                    />
+                    <motion.div
+                        variants={modalVariants}
+                        className="relative w-full max-w-lg glass-strong rounded-t-3xl p-6 pb-8 border-t border-rose-100"
+                    >
+                        <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6" />
+
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-800">Satıcı ilə əlaqə</h3>
+                                <p className="text-sm text-gray-500">{listing.name}</p>
+                            </div>
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={onClose}
+                                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
+                            >
+                                <X size={18} className="text-gray-500" />
+                            </motion.button>
+                        </div>
+
+                        <div className="bg-rose-50/50 rounded-2xl p-4 mb-4 border border-rose-100">
+                            <p className="text-center text-xl font-semibold text-gray-800 tracking-wide">
+                                {listing.phone}
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={handleCopy}
+                                className="flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 font-medium py-3.5 px-4 rounded-2xl shadow-sm"
+                            >
+                                {copied ? (
+                                    <>
+                                        <Check size={18} className="text-emerald-500" />
+                                        <span>Kopyalandı</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Copy size={18} />
+                                        <span>Kopyala</span>
+                                    </>
+                                )}
+                            </motion.button>
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={handleWhatsApp}
+                                className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium py-3.5 px-4 rounded-2xl shadow-lg shadow-emerald-500/25"
+                            >
+                                <MessageCircle size={18} />
+                                <span>WhatsApp</span>
+                            </motion.button>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            );
+        };
+
+        const ListingDetail = ({ listing, onBack, onContact }) => {
+            const [currentImage, setCurrentImage] = useState(0);
+            const [imageLoaded, setImageLoaded] = useState(false);
+            const discount = Math.round((1 - listing.resalePrice / listing.originalPrice) * 100);
+
+            return (
+                <motion.div
+                    variants={pageVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    className="min-h-screen pb-24"
+                >
+                    <Header showBack onBack={onBack} title={listing.flowerType} />
+
+                    <div className="max-w-lg mx-auto">
+                        <div className="relative aspect-[4/5] bg-rose-50 overflow-hidden">
+                            {!imageLoaded && <div className="absolute inset-0 skeleton" />}
+                            <motion.img
+                                key={currentImage}
+                                src={listing.images[currentImage]}
+                                alt={listing.flowerType}
+                                onLoad={() => setImageLoaded(true)}
+                                initial={{ opacity: 0, scale: 1.05 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.4 }}
+                                className="w-full h-full object-cover photo-style"
+                                style={{ transform: 'rotate(-0.3deg)' }}
+                            />
+
+                            {listing.images.length > 1 && (
+                                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                                    {listing.images.map((_, idx) => (
+                                        <motion.button
+                                            key={idx}
+                                            onClick={() => { setImageLoaded(false); setCurrentImage(idx); }}
+                                            className={`w-2 h-2 rounded-full transition-all ${idx === currentImage ? 'bg-white w-6' : 'bg-white/50'}`}
+                                            whileHover={{ scale: 1.2 }}
+                                            whileTap={{ scale: 0.9 }}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="px-4 py-6 space-y-5">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <h1 className="text-2xl font-bold text-gray-800 mb-1">{listing.flowerType}</h1>
+                                    <div className="flex items-center gap-2 text-gray-500 text-sm">
+                                        <MapPin size={14} />
+                                        <span>{listing.district} rayonu</span>
+                                        <span className="text-gray-300">|</span>
+                                        <Clock size={14} />
+                                        <span>{formatTime(listing.postedMinutes)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-gradient-to-br from-rose-50 to-white rounded-2xl p-5 border border-rose-100">
+                                <div className="flex items-baseline gap-3 mb-1">
+                                    <span className="text-3xl font-bold text-rose-600">{listing.resalePrice} ₼</span>
+                                    <motion.span
+                                        className="bg-rose-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full"
+                                        animate={{ scale: [1, 1.05, 1] }}
+                                        transition={{ duration: 2, repeat: Infinity }}
+                                    >
+                                        -{discount}%
+                                    </motion.span>
+                                </div>
+                                <div className="flex items-center gap-2 text-gray-500 text-sm">
+                                    <span>Əvvəlki qiyməti:</span>
+                                    <span className="line-through">{listing.originalPrice} ₼</span>
+                                </div>
+                            </div>
+
+                            <FreshnessTimer hours={listing.freshnessHours} />
+
+                            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-rose-100">
+                                <h3 className="font-medium text-gray-700 mb-2">Satıcıdan</h3>
+                                <p className="text-gray-600 text-sm leading-relaxed">{listing.description}</p>
+                                <p className="text-rose-500 font-medium text-sm mt-3">— {listing.name}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="fixed bottom-0 left-0 right-0 p-4 glass border-t border-rose-100/50">
+                        <div className="max-w-lg mx-auto">
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={onContact}
+                                className="w-full bg-gradient-to-r from-rose-500 to-rose-600 text-white font-semibold py-4 px-6 rounded-2xl shadow-lg shadow-rose-500/30 flex items-center justify-center gap-2"
+                            >
+                                <MessageCircle size={20} />
+                                <span>Əlaqə</span>
+                            </motion.button>
+                        </div>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const Catalog = ({ onSelectListing }) => {
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                const timer = setTimeout(() => setLoading(false), 800);
+                return () => clearTimeout(timer);
+            }, []);
+
+            return (
+                <motion.div
+                    variants={pageVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    className="min-h-screen pb-8"
+                >
+                    <Header title="Çiçək Bazarı" />
+
+                    <main className="max-w-lg mx-auto px-4 py-5">
+                        <motion.div
+                            className="grid grid-cols-2 gap-4"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                        >
+                            {loading ? (
+                                Array.from({ length: 6 }).map((_, i) => (
+                                    <SkeletonCard key={i} />
+                                ))
+                            ) : (
+                                listings.map((listing, index) => (
+                                    <ListingCard
+                                        key={listing.id}
+                                        listing={listing}
+                                        index={index}
+                                        onClick={() => onSelectListing(listing)}
+                                    />
+                                ))
+                            )}
+                        </motion.div>
+                    </main>
+                </motion.div>
+            );
+        };
+
+        const App = () => {
+            const [screen, setScreen] = useState('catalog');
+            const [selectedListing, setSelectedListing] = useState(null);
+            const [showContact, setShowContact] = useState(false);
+
+            const handleSelectListing = (listing) => {
+                setSelectedListing(listing);
+                setScreen('detail');
+            };
+
+            const handleBack = () => {
+                setScreen('catalog');
+                setSelectedListing(null);
+            };
+
+            return (
+                <div className="min-h-screen">
+                    <AnimatePresence mode="wait">
+                        {screen === 'catalog' && (
+                            <Catalog
+                                key="catalog"
+                                onSelectListing={handleSelectListing}
+                            />
+                        )}
+                        {screen === 'detail' && selectedListing && (
+                            <ListingDetail
+                                key="detail"
+                                listing={selectedListing}
+                                onBack={handleBack}
+                                onContact={() => setShowContact(true)}
+                            />
+                        )}
+                    </AnimatePresence>
+
+                    <AnimatePresence>
+                        {showContact && selectedListing && (
+                            <ContactModal
+                                key="contact"
+                                listing={selectedListing}
+                                onClose={() => setShowContact(false)}
+                            />
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
